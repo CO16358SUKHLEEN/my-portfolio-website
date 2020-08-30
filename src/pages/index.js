@@ -1,5 +1,13 @@
-import React from "react"
+import React, {Fragment} from "react"
+import {Link} from "gatsby";
 
-export default function Home() {
-  return <div>Hello world!</div>
+
+const Home = () => {
+ return (
+<Fragment>
+<div>sukhleen</div>
+   <Link to="/about">about</Link>
+</Fragment> 
+ )
 }
+export default Home;
