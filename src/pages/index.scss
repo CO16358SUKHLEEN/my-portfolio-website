@@ -1,0 +1,85 @@
+
+body{
+    background-color: #000;
+    height: 100vh;
+    margin: 0;
+    
+}
+.Home{
+   
+    &__main{
+        display: flex;
+        justify-content: center;
+        padding-left: 5%;
+    }
+    &__pic{
+    //    border: 1px solid;  
+    //    box-shadow: 8px 8px 16px wh;
+        border-radius: 100%;
+    } 
+
+    &__header{
+        display: flex;
+        justify-content: flex-end;
+        padding: 3%;
+    }
+    &__cursor{
+        width: 20px;
+        height: 20px;
+        border: 1px solid white;
+        border-radius: 50%;
+        position: absolute;
+        transition-duration: 200ms;
+        transition-timing-function: ease-out;
+        animation: cursorAnim .5s infinite alternate;
+    }
+
+    &__cursor::after {
+        content: "";
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        border: 8px solid grey;
+        border-radius: 50%;
+        opacity: .5;
+        top: -5px;
+        left: -5px;
+        animation: cursorAnim2 .5s infinite alternate;
+    }
+
+}
+
+@keyframes cursorAnim {
+    from {
+        transform: scale(1);
+
+    }
+    to {
+        transform: scale(.7);
+    }
+}
+@keyframes cursorAnim2 {
+    from {
+        transform: scale(1);
+
+    }
+    to {
+        transform: scale(.4);
+    }
+}
+@keyframes cursorAnim3 {
+    0% {
+        transform: scale(1);
+
+    }
+    50% {
+        transform: scale(3);
+    }
+    100%{
+        transform: scale(1)
+    }
+}
+.expand{
+    animation: cursorAnim3 .5s forwards;
+    // border: 6px solid brown;
+}
