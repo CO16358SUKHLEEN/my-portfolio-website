@@ -1,99 +1,383 @@
-<!-- AUTO-GENERATED-CONTENT:START (STARTER) -->
-<p align="center">
-  <a href="https://www.gatsbyjs.com">
-    <img alt="Gatsby" src="https://www.gatsbyjs.com/Gatsby-Monogram.svg" width="60" />
+# i18next Parser [![Build Status](https://travis-ci.org/i18next/i18next-parser.svg?branch=master)](https://travis-ci.org/i18next/i18next-parser)
+
+[![NPM](https://nodei.co/npm/i18next-parser.png?downloads=true&stars=true)](https://www.npmjs.com/package/i18next-parser)
+
+When translating an application, maintaining the translation catalog by hand is painful. This package parses your code and automates this process.
+
+Finally, if you want to make this process even less painful, I invite you to check [Locize](https://locize.com/). They are a sponsor of this project. Actually, if you use this package and like it, supporting me on [Patreon](https://www.patreon.com/karelledru) would mean a great deal!
+
+<p>
+  <a href="https://www.patreon.com/karelledru" target="_blank">
+    <img src="https://c5.patreon.com/external/logo/become_a_patron_button.png" alt="Become a Patreon">
   </a>
 </p>
-<h1 align="center">
-  Gatsby's hello-world starter
-</h1>
 
-Kick off your project with this hello-world boilerplate. This starter ships with the main Gatsby configuration files you might need to get up and running blazing fast with the blazing fast app generator for React.
+## Features
 
-_Have another more specific idea? You may want to check out our vibrant collection of [official and community-created starters](https://www.gatsbyjs.com/docs/gatsby-starters/)._
+- Choose your weapon: A CLI, a standalone parser or a stream transform
+- 6 built in lexers: Javascript, JSX, HTML, Handlebars, TypeScript+tsx and Vue
+- Creates one catalog file per locale and per namespace
+- Backs up the old keys your code doesn't use anymore in `namespace_old.json` catalog
+- Restores keys from the `_old` file if the one in the translation file is empty
+- Supports i18next features:
+  - **Context**: keys of the form `key_context`
+  - **Plural**: keys of the form `key_plural` and `key_0`, `key_1` as described [here](https://www.i18next.com/translation-function/plurals)
+- Tested on Node 6+
 
-## 🚀 Quick start
+## Versions
 
-1.  **Create a Gatsby site.**
+`1.x` has been in beta for a good while. You can follow the pre-releases [here](https://github.com/i18next/i18next-parser/releases). It is a deep rewrite of this package that solves many issues, the main one being that it was slowly becoming unmaintainable. The [migration](docs/migration.md) from `0.x` contains all the breaking changes. Everything that follows is related to `1.x`. You can still find the old `0.x` documentation on its dedicated [branch](https://github.com/i18next/i18next-parser/tree/0.x.x).
 
-    Use the Gatsby CLI to create a new site, specifying the hello-world starter.
 
-    ```shell
-    # create a new Gatsby site using the hello-world starter
-    gatsby new my-hello-world-starter https://github.com/gatsbyjs/gatsby-starter-hello-world
-    ```
+## Usage
 
-1.  **Start developing.**
+### CLI
 
-    Navigate into your new site’s directory and start it up.
+You can use the CLI with the package installed locally but if you want to use it from anywhere, you better install it globally:
 
-    ```shell
-    cd my-hello-world-starter/
-    gatsby develop
-    ```
+```
+yarn global add i18next-parser
+npm install -g i18next-parser
+i18next 'app/**/*.{js,hbs}' 'lib/**/*.{js,hbs}' [-oc]
+```
 
-1.  **Open the source code and start editing!**
+Multiple globbing patterns are supported to specify complex file selections. You can learn how to write globs [here](https://github.com/isaacs/node-glob). Note that glob must be wrapped with single quotes when passed as arguments.
 
-    Your site is now running at `http://localhost:8000`!
+**IMPORTANT NOTE**: If you pass the globs as CLI argument, they must be relative to where you run the command (aka relative to `process.cwd()`). If you pass the globs via the `input` option of the config file, they must be relative to the config file.
 
-    _Note: You'll also see a second link: _`http://localhost:8000/___graphql`_. This is a tool you can use to experiment with querying your data. Learn more about using this tool in the [Gatsby tutorial](https://www.gatsbyjs.com/tutorial/part-five/#introducing-graphiql)._
+- **-c, --config <path>**: Path to the config file (default: i18next-parser.config.js).
+- **-o, --output <path>**: Path to the output directory (default: locales/$LOCALE/$NAMESPACE.json).
+- **-S, --silent**: Disable logging to stdout.
 
-    Open the `my-hello-world-starter` directory in your code editor of choice and edit `src/pages/index.js`. Save your changes and the browser will update in real time!
+### Gulp
 
-## 🧐 What's inside?
+Save the package to your devDependencies:
 
-A quick look at the top-level files and directories you'll see in a Gatsby project.
+```
+yarn add -D i18next-parser
+npm install --save-dev i18next-parser
+```
 
-    .
-    ├── node_modules
-    ├── src
-    ├── .gitignore
-    ├── .prettierrc
-    ├── gatsby-browser.js
-    ├── gatsby-config.js
-    ├── gatsby-node.js
-    ├── gatsby-ssr.js
-    ├── LICENSE
-    ├── package-lock.json
-    ├── package.json
-    └── README.md
+[Gulp](http://gulpjs.com/) defines itself as the streaming build system. Put simply, it is like Grunt, but performant and elegant.
 
-1.  **`/node_modules`**: This directory contains all of the modules of code that your project depends on (npm packages) are automatically installed.
+```javascript
+const i18nextParser = require('i18next-parser').gulp;
 
-2.  **`/src`**: This directory will contain all of the code related to what you will see on the front-end of your site (what you see in the browser) such as your site header or a page template. `src` is a convention for “source code”.
+gulp.task('i18next', function() {
+  gulp.src('app/**')
+    .pipe(new i18nextParser({
+      locales: ['en', 'de'],
+      output: 'locales/$LOCALE/$NAMESPACE.json'
+    }))
+    .pipe(gulp.dest('./'));
+});
+```
 
-3.  **`.gitignore`**: This file tells git which files it should not track / not maintain a version history for.
+**IMPORTANT**: `output` is required to know where to read the catalog from. You might think that `gulp.dest()` is enough though it does not inform the transform where to read the existing catalog from.
 
-4.  **`.prettierrc`**: This is a configuration file for [Prettier](https://prettier.io/). Prettier is a tool to help keep the formatting of your code consistent.
+### Broccoli
 
-5.  **`gatsby-browser.js`**: This file is where Gatsby expects to find any usage of the [Gatsby browser APIs](https://www.gatsbyjs.com/docs/browser-apis/) (if any). These allow customization/extension of default Gatsby settings affecting the browser.
+Save the package to your devDependencies:
 
-6.  **`gatsby-config.js`**: This is the main configuration file for a Gatsby site. This is where you can specify information about your site (metadata) like the site title and description, which Gatsby plugins you’d like to include, etc. (Check out the [config docs](https://www.gatsbyjs.com/docs/gatsby-config/) for more detail).
+```
+yarn add -D i18next-parser
+npm install --save-dev i18next-parser
+```
 
-7.  **`gatsby-node.js`**: This file is where Gatsby expects to find any usage of the [Gatsby Node APIs](https://www.gatsbyjs.com/docs/node-apis/) (if any). These allow customization/extension of default Gatsby settings affecting pieces of the site build process.
+[Broccoli.js](https://github.com/broccolijs/broccoli) defines itself as a fast, reliable asset pipeline, supporting constant-time rebuilds and compact build definitions.
 
-8.  **`gatsby-ssr.js`**: This file is where Gatsby expects to find any usage of the [Gatsby server-side rendering APIs](https://www.gatsbyjs.com/docs/ssr-apis/) (if any). These allow customization of default Gatsby settings affecting server-side rendering.
+```javascript
 
-9.  **`LICENSE`**: This Gatsby starter is licensed under the 0BSD license. This means that you can see this file as a placeholder and replace it with your own license.
+const Funnel = require('broccoli-funnel')
+const i18nextParser = require('i18next-parser').broccoli;
 
-10. **`package-lock.json`** (See `package.json` below, first). This is an automatically generated file based on the exact versions of your npm dependencies that were installed for your project. **(You won’t change this file directly).**
+const appRoot = 'broccoli'
 
-11. **`package.json`**: A manifest file for Node.js projects, which includes things like metadata (the project’s name, author, etc). This manifest is how npm knows which packages to install for your project.
+let i18n = new Funnel(appRoot, {
+  files: ['handlebars.hbs', 'javascript.js'],
+  annotation: 'i18next-parser'
+})
 
-12. **`README.md`**: A text file containing useful reference information about your project.
+i18n = new i18nextParser([i18n], {
+  output: 'broccoli/locales/$LOCALE/$NAMESPACE.json'
+})
 
-## 🎓 Learning Gatsby
+module.exports = i18n
+```
 
-Looking for more guidance? Full documentation for Gatsby lives [on the website](https://www.gatsbyjs.com/). Here are some places to start:
+## Options
 
-- **For most developers, we recommend starting with our [in-depth tutorial for creating a site with Gatsby](https://www.gatsbyjs.com/tutorial/).** It starts with zero assumptions about your level of ability and walks through every step of the process.
+Using a config file gives you fine-grained control over how i18next-parser treats your files. Here's an example config showing all config options with their defaults.
 
-- **To dive straight into code samples, head [to our documentation](https://www.gatsbyjs.com/docs/).** In particular, check out the _Guides_, _API Reference_, and _Advanced Tutorials_ sections in the sidebar.
+```js
+// i18next-parser.config.js
 
-## 💫 Deploy
+module.exports = {
+  contextSeparator: '_',
+  // Key separator used in your translation keys
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/gatsbyjs/gatsby-starter-hello-world)
+  createOldCatalogs: true,
+  // Save the \_old files
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/import/project?template=https://github.com/gatsbyjs/gatsby-starter-hello-world)
+  defaultNamespace: 'translation',
+  // Default namespace used in your i18next config
 
-<!-- AUTO-GENERATED-CONTENT:END -->
+  defaultValue: '',
+  // Default value to give to empty keys
+
+  indentation: 2,
+  // Indentation of the catalog files
+
+  keepRemoved: false,
+  // Keep keys from the catalog that are no longer in code
+
+  keySeparator: '.',
+  // Key separator used in your translation keys
+  // If you want to use plain english keys, separators such as `.` and `:` will conflict. You might want to set `keySeparator: false` and `namespaceSeparator: false`. That way, `t('Status: Loading...')` will not think that there are a namespace and three separator dots for instance.
+
+  // see below for more details
+  lexers: {
+    hbs: ['HandlebarsLexer'],
+    handlebars: ['HandlebarsLexer'],
+
+    htm: ['HTMLLexer'],
+    html: ['HTMLLexer'],
+
+    mjs: ['JavascriptLexer'],
+    js: ['JavascriptLexer'], // if you're writing jsx inside .js files, change this to JsxLexer
+    ts: ['JavascriptLexer'],
+    jsx: ['JsxLexer'],
+    tsx: ['JsxLexer'],
+
+    default: ['JavascriptLexer']
+  },
+
+  lineEnding: 'auto',
+  // Control the line ending. See options at https://github.com/ryanve/eol
+
+  locales: ['en', 'fr'],
+  // An array of the locales in your applications
+
+  namespaceSeparator: ':',
+  // Namespace separator used in your translation keys
+  // If you want to use plain english keys, separators such as `.` and `:` will conflict. You might want to set `keySeparator: false` and `namespaceSeparator: false`. That way, `t('Status: Loading...')` will not think that there are a namespace and three separator dots for instance.
+
+  output: 'locales/$LOCALE/$NAMESPACE.json',
+  // Supports $LOCALE and $NAMESPACE injection
+  // Supports JSON (.json) and YAML (.yml) file formats
+  // Where to write the locale files relative to process.cwd()
+
+  input: undefined,
+  // An array of globs that describe where to look for source files
+  // relative to the location of the configuration file
+
+  reactNamespace: false,
+  // For react file, extract the defaultNamespace - https://react.i18next.com/components/translate-hoc.html
+  // Ignored when parsing a `.jsx` file and namespace is extracted from that file.
+
+  sort: false,
+  // Whether or not to sort the catalog
+
+  skipDefaultValues: false,
+  // Whether to ignore default values.
+
+  useKeysAsDefaultValue: false,
+  // Whether to use the keys as the default value; ex. "Hello": "Hello", "World": "World"
+  // This option takes precedence over the `defaultValue` and `skipDefaultValues` options
+
+  verbose: false,
+  // Display info about the parsing including some stats
+
+  customValueTemplate: null,
+  // If you wish to customize the value output the value as an object, you can set your own format.
+  // ${defaultValue} is the default value you set in your translation function.
+  // Any other custom property will be automatically extracted.
+  //
+  // Example:
+  // {
+  //   message: "${defaultValue}",
+  //   description: "${maxLength}", // t('my-key', {maxLength: 150})
+  // }
+}
+```
+
+### Lexers
+
+The `lexers` option let you configure which Lexer to use for which extension. Here is the default:
+
+Note the presence of a `default` which will catch any extension that is not listed.
+There are 4 lexers available: `HandlebarsLexer`, `HTMLLexer`, `JavascriptLexer` and
+`JsxLexer`. Each has configurations of its own. Typescript is supported via `JavascriptLexer` and `JsxLexer`.
+If you need to change the defaults, you can do it like so:
+
+#### Javascript
+The Javascript lexer uses [Acorn](https://github.com/acornjs/acorn) to walk through your code and extract references
+translation functions. If your code uses features not supported natively by Acorn, you can enable support through
+`injectors` and `plugins` configuration. Note that you must install these additional dependencies yourself through
+`yarn` or `npm`; they are not included in this package. This is an example configuration that adds all non-jsx plugins supported by acorn
+at the time of writing:
+```javascript
+const injectAcornStaticClassPropertyInitializer = require('acorn-static-class-property-initializer/inject');
+const injectAcornStage3 = require('acorn-stage3/inject');
+const injectAcornEs7 = require('acorn-es7');
+
+// ...
+  js: [{
+    lexer: 'JavascriptLexer'
+    functions: ['t'], // Array of functions to match
+
+    // acorn config (for more information on the acorn options, see here: https://github.com/acornjs/acorn#main-parser)
+    acorn: {
+      injectors: [
+          injectAcornStaticClassPropertyInitializer,
+          injectAcornStage3,
+          injectAcornEs7,
+        ],
+      plugins: {
+        // The presence of these plugin options is important -
+        // without them, the plugins will be available but not
+        // enabled.
+        staticClassPropertyInitializer: true,
+        stage3: true,
+        es7: true,
+      }
+    }
+  }],
+// ...
+```
+
+If you receive an error that looks like this:
+```bash
+TypeError: baseVisitor[type] is not a function
+# rest of stack trace...
+```
+The problem is likely that you are missing a plugin that supports a feature that your code uses.
+
+The default configuration is below:
+
+```js
+{
+  // JavascriptLexer default config (js, mjs)
+  js: [{
+    lexer: 'JavascriptLexer'
+    functions: ['t'], // Array of functions to match
+
+    // acorn config (for more information on the acorn options, see here: https://github.com/acornjs/acorn#main-parser)
+    acorn: {
+      sourceType: 'module',
+      ecmaVersion: 9, // forward compatibility
+      // Allows additional acorn plugins via the exported injector functions
+      injectors: [],
+      plugins: {},
+    }
+  }],
+}
+```
+
+#### Jsx
+The JSX lexer builds off of the Javascript lexer, and additionally requires the `acorn-jsx` plugin. To use it, add `acorn-jsx` to your dev dependencies:
+```bash
+npm install -D acorn-jsx
+# or
+yarn add -D acorn-jsx@4.1.1
+```
+
+Default configuration:
+```js
+{
+  // JsxLexer default config (jsx)
+  // JsxLexer can take all the options of the JavascriptLexer plus the following
+  jsx: [{
+    lexer: 'JsxLexer',
+    attr: 'i18nKey', // Attribute for the keys
+
+    // acorn config (for more information on the acorn options, see here: https://github.com/acornjs/acorn#main-parser)
+    acorn: {
+      sourceType: 'module',
+      ecmaVersion: 9, // forward compatibility
+      injectors: [],
+      plugins: {},
+    }
+  }],
+}
+```
+#### Ts(x)
+Typescript is supported via Javascript and Jsx lexers. If you are using Javascript syntax (e.g. with React), follow the steps in Jsx section, otherwise Javascript section.
+
+#### Handlebars
+```js
+{
+  // HandlebarsLexer default config (hbs, handlebars)
+  handlebars: [{
+    lexer: 'HandlebarsLexer',
+    functions: ['t'] // Array of functions to match
+  }]
+}
+```
+#### Html
+```js
+{
+  // HtmlLexer default config (htm, html)
+  html: [{
+    lexer: 'HtmlLexer',
+    attr: 'data-i18n' // Attribute for the keys
+    optionAttr: 'data-i18n-options' // Attribute for the options
+  }]
+}
+```
+
+#### Custom lexers
+You can provide function instead of string as a custom lexer.
+```js
+const CustomJsLexer = require('./CustomJsLexer');
+
+// ...
+{
+  js: [CustomJsLexer],
+  jsx: [{
+    lexer: CustomJsLexer,
+    customOption: true // Custom attribute passed to CustomJsLexer class constructor
+  }]
+}
+// ...
+```
+
+## Events
+
+The transform emits a `reading` event for each file it parses:
+
+`.pipe( i18next().on('reading', (file) => {}) )`
+
+The transform emits a `error:json` event if the JSON.parse on json files fail:
+
+`.pipe( i18next().on('error:json', (path, error) => {}) )`
+
+The transform emits a `warning:variable` event if the file has a key that contains a variable:
+
+`.pipe( i18next().on('warning:variable', (path, key) => {}) )`
+
+
+
+## Contribute
+
+Any contribution is welcome. Please [read the guidelines](docs/development.md) first.
+
+Thanks a lot to all the previous [contributors](https://github.com/i18next/i18next-parser/graphs/contributors).
+
+If you use this package and like it, supporting me on [Patreon](https://www.patreon.com/karelledru) is another great way to contribute!
+
+<p>
+  <a href="https://www.patreon.com/karelledru" target="_blank">
+    <img src="https://c5.patreon.com/external/logo/become_a_patron_button.png" alt="Become a Patreon">
+  </a>
+</p>
+
+--------------
+
+## Gold Sponsors
+
+<p>
+  <a href="https://locize.com/" target="_blank">
+    <img src="https://raw.githubusercontent.com/i18next/i18next/master/assets/locize_sponsor_240.gif" width="240px">
+  </a>
+</p>
