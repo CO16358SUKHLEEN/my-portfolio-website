@@ -24,3 +24,5 @@ outputLanguages: ["fr", "en", "zh-CN"], //Language codes
 inputLang: "English"
 }
 ```
+
+![image](https://user-images.githubusercontent.com/35762394/94409408-c01edb00-0193-11eb-9fd3-712dd2252435.png)
