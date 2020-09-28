@@ -5,10 +5,10 @@ i18next is widely used for translating applications; packages like i18next-parse
 this package automates the process of translating all the keys in the json files using google api, translating and organising these files with key-value pairs in respective output paths, coniguriable by user.
 
 ## Features
--- uses puppeteer for translating keys, 
--- creates directories and files with translated key-value pairs under specific namespace folders.
--- cli-spinner which keeps the user updated with the progress of translations.
--- user can configure, input file path, outpathPath, define languages, name of the output file to be created.
+- uses puppeteer for translating keys, 
+- creates directories and files with translated key-value pairs under specific namespace folders.
+- cli-spinner which keeps the user updated with the progress of translations.
+- user can configure, input file path, outpathPath, define languages, name of the output file to be created.
 
 ## Usage
 
