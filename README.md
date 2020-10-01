@@ -1,6 +1,6 @@
 # @puppeteer/i18next-autoTranslator
 
-i18next is widely used for translating applications; packages like i18next-parser can be used to automate the process of maintaining translation catalog. however, extracting the keys in applicaion and organising it in configurable json files is what tools like i18next-parser are capabale of doing, the json files with translation values are yet to filled by the user.
+i18next is widely used for translating applications; packages like i18next-parser can be used to automate the process of maintaining translation catalog. however, such tools extract the keys in applicaion and organise them in configurable json files which are yet to be filled by the user.
 
 this package automates the process of translating all the keys in the json files using google api, translating and organising these files with key-value pairs in respective output path which is configurable by the user.
 
