@@ -11,8 +11,7 @@ this package automates the process of translating all the keys in the json files
 - user can configure, input file path, outpathPath, define languages, name of the output file to be created.
 
 ## Usage
-
-Using a config file gives you fine-grained control over how i18next-parser treats your files. Here's an example config showing all config options with their defaults.
+Create a translation-config.js file in the root directory, and execute the command "autoTranslate" in cmd 
 
 ```js
 // translation-config.js
